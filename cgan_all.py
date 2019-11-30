@@ -253,9 +253,7 @@ for epoch in range(opt.n_epochs):
             optimizer_D.step()
             
         if i%1000==0:
-            print_stmt =
-                "[Epoch %d/%d] [Batch %d/%d] [D loss: %f] [G loss: %f]"
-                % (epoch, opt.n_epochs, i, len(dataloader), total_d_loss/(1000/opt.n_discriminator), total_g_loss/1000)
+            print_stmt = "[Epoch %d/%d] [Batch %d/%d] [D loss: %f] [G loss: %f]" % (epoch, opt.n_epochs, i, len(dataloader), total_d_loss/(1000/opt.n_discriminator), total_g_loss/1000)
             print(print_stmt)
             loss_file.write(print_stmt + "\n")
             total_d_loss = 0.0
