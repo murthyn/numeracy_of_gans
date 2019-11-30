@@ -59,7 +59,7 @@ else:
     numbers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 
 
-name = str(opt.n_epochs)+"_"+str(opt.batch_size)+"_"+str(opt.lr)+"_"+str(opt.n_discriminator)+"_"+str(opt.loss)
+name = str(opt.n_epochs)+"_"+str(opt.batch_size)+"_"+str(opt.lr)+"_"+str(opt.n_discriminator)+"_"+str(opt.loss)+"_"+str(opt.n_classes)
 os.makedirs(os.path.join("images/", str(name)), exist_ok=True)
 
 
