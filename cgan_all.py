@@ -189,6 +189,8 @@ def sample_image(n_row, batches_done):
 #  Training
 # ----------
 
+loss_file = open("images/" + str(name) + "/loss_file.txt","w")
+
 for epoch in range(opt.n_epochs):
     for i, (imgs, labels) in enumerate(dataloader):
 
@@ -251,10 +253,11 @@ for epoch in range(opt.n_epochs):
             optimizer_D.step()
             
         if i%1000==0:
-            print(
+            print_stmt =
                 "[Epoch %d/%d] [Batch %d/%d] [D loss: %f] [G loss: %f]"
                 % (epoch, opt.n_epochs, i, len(dataloader), total_d_loss/(1000/opt.n_discriminator), total_g_loss/1000)
-            )
+            print(print_stmt)
+            loss_file.write(print_stmt + "\n")
             total_d_loss = 0.0
             total_g_loss = 0.0
 
@@ -262,3 +265,4 @@ for epoch in range(opt.n_epochs):
         if batches_done % opt.sample_interval == 0:
             sample_image(n_row=20, batches_done=batches_done)
             
+loss_file.close()
