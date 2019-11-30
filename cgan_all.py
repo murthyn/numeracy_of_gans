@@ -36,6 +36,7 @@ parser.add_argument("--sample_interval", type=int, default=1000, help="interval 
 parser.add_argument("--embedding_size", type=int, default=50, help="size of embedding layer")
 parser.add_argument("--n_discriminator", type=int, default=1, help="train discriminator every n_discriminator iterations")
 parser.add_argument("--loss", type=str, default="MSE", help="adversarial loss: MSE or Wasserstein")
+parser.add_argument("--use_10", type=bool, default=False, help="use 10 classes or test on all 50")
 opt = parser.parse_args()
 
 
