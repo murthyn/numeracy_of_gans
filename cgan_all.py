@@ -265,3 +265,8 @@ for epoch in range(opt.n_epochs):
             sample_image(batches_done=batches_done)
             
 loss_file.close()
+
+# save models
+torch.save(generator, "images/" + str(name) + "/generator.pt")
+torch.save(discriminator, "images/" + str(name) + "/discriminator.pt")
+
