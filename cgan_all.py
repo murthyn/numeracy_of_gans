@@ -29,7 +29,7 @@ parser.add_argument("--b1", type=float, default=0.5, help="adam: decay of first 
 parser.add_argument("--b2", type=float, default=0.999, help="adam: decay of first order momentum of gradient")
 parser.add_argument("--n_cpu", type=int, default=8, help="number of cpu threads to use during batch generation")
 parser.add_argument("--latent_dim", type=int, default=100, help="dimensionality of the latent space")
-parser.add_argument("--n_classes", type=int, default=50, help="number of classes for dataset (if n_classes, then will be set to 10)")
+parser.add_argument("--n_classes", type=int, default=50, help="number of classes for dataset (if use_10, then will be set to 10)")
 parser.add_argument("--img_size", type=int, default=32, help="size of each image dimension")
 parser.add_argument("--channels", type=int, default=1, help="number of image channels")
 parser.add_argument("--sample_interval", type=int, default=1000, help="interval between image sampling")
@@ -51,12 +51,13 @@ if opt.use_10:
     y = torch.Tensor(y[:60000]).to(torch.int8)
     opt.n_classes = 10
     img_shape = (opt.channels, opt.img_size, opt.img_size)
-    numbers = [1, 22, 23, 26, 29, 33, 35, 37, 42, 48]
+    numbers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 else:
-    x = torch.Tensor(x)
+    x = torch.Tensor(x).to(torch.int8)
     y = torch.Tensor(y).to(torch.int8)
     img_shape = (opt.channels, opt.img_size, opt.img_size*2)
-    numbers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+    numbers = [1, 22, 23, 26, 29, 33, 35, 37, 42, 48]
+    
 
 
 name = str(opt.n_epochs)+"_"+str(opt.batch_size)+"_"+str(opt.lr)+"_"+str(opt.n_discriminator)+"_"+str(opt.loss)+"_"+str(opt.n_classes)
@@ -174,9 +175,8 @@ else:
 FloatTensor = torch.cuda.FloatTensor if cuda else torch.FloatTensor
 LongTensor = torch.cuda.LongTensor if cuda else torch.LongTensor
 
-def sample_image(n_row, batches_done):
+def sample_image(batches_done):
     """Saves a grid of generated digits ranging from 0 to n_classes"""
-    """does not use n_row"""
     # Sample noise
     z = Variable(FloatTensor(np.random.normal(0, 1, (10*10, opt.latent_dim))))
     # Get labels ranging from 0 to n_classes for n rows
@@ -262,6 +262,6 @@ for epoch in range(opt.n_epochs):
 
         batches_done = epoch * len(dataloader) + i
         if batches_done % opt.sample_interval == 0:
-            sample_image(n_row=20, batches_done=batches_done)
+            sample_image(batches_done=batches_done)
             
 loss_file.close()
