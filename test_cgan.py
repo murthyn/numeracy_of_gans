@@ -85,7 +85,7 @@ opt = parser.parse_args()
 
 # load generator, discriminator and digit embeddings
 generator = torch.load("images/" + str(opt.name) + "/generator.pt")
-discriminator = torch.save("images/" + str(opt.name) + "/discriminator.pt")
+discriminator = torch.load("images/" + str(opt.name) + "/discriminator.pt")
 digit_embeddings = np.load("digit_embeddings.npy")
 
 # set both models to eval mode
