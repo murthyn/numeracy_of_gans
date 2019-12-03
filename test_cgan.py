@@ -21,6 +21,8 @@ from matplotlib import pyplot as plt
 
 from PIL import Image
 
+from cgan_all import Generator, Discriminator
+
 parser = argparse.ArgumentParser()
 parser.add_argument("--name", type=str, default="None", help="name of training (refer to cgan_all.py)")
 opt = parser.parse_args()
@@ -43,6 +45,7 @@ if cuda:
 
 # get training conditions
 n_epochs, batch_size, lr, n_discriminator, loss, n_classes = opt.name.split("_")
+n_epochs, batch_size, lr, n_discriminator, n_classes = int(n_epochs), int(batch_size), float(lr), int(n_discriminator), int(n_classes)
 
 latent_dim = 100 # NEED TO MANUALLY CHANGE
 
