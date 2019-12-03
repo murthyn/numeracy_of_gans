@@ -24,6 +24,7 @@ from PIL import Image
 
 FloatTensor = torch.cuda.FloatTensor if cuda else torch.FloatTensor
 LongTensor = torch.cuda.LongTensor if cuda else torch.LongTensor
+cuda = True if torch.cuda.is_available() else False
 
 class Generator(nn.Module):
     def __init__(self):
@@ -96,7 +97,6 @@ generator.eval()
 discriminator.eval()
 
 # if cuda is available, use it
-cuda = True if torch.cuda.is_available() else False
 if cuda:
     generator.cuda()
     discriminator.cuda()
