@@ -22,6 +22,9 @@ from matplotlib import pyplot as plt
 from PIL import Image
 
 
+FloatTensor = torch.cuda.FloatTensor if cuda else torch.FloatTensor
+LongTensor = torch.cuda.LongTensor if cuda else torch.LongTensor
+
 class Generator(nn.Module):
     def __init__(self):
         super(Generator, self).__init__()
