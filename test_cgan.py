@@ -118,7 +118,7 @@ def sample_images(numbers):
     labels = np.array([num for _ in range(10) for num in numbers])
     gen_labels = Variable(FloatTensor(digit_embeddings[labels]))
     gen_imgs = generator(z, gen_labels)
-    save_image(gen_imgs.data, "images/" + "test_" + str(numbers) + ".png", nrow=10, normalize=True)
+    save_image(gen_imgs.data, "images/" + str(opt.name) + "/test_" + str(numbers) + ".png", nrow=10, normalize=True)
 
 total_numbers = [i for i in range(0,70)]
 
