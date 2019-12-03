@@ -21,6 +21,20 @@ from matplotlib import pyplot as plt
 
 from PIL import Image
 
+parser = argparse.ArgumentParser()
+parser.add_argument("--name", type=str, default="None", help="name of training (refer to cgan_all.py)")
+opt = parser.parse_args()
+
+# get training conditions
+n_epochs, batch_size, lr, n_discriminator, loss, n_classes = opt.name.split("_")
+n_epochs, batch_size, lr, n_discriminator, n_classes = int(n_epochs), int(batch_size), float(lr), int(n_discriminator), int(n_classes)
+
+latent_dim = 100 # NEED TO MANUALLY CHANGE
+img_size = 32
+channels = 1
+img_shape = (channels, img_size, img_size) if n_classes == 10 else (channels, img_size, img_size*2)
+embedding_size = 50
+
 cuda = True if torch.cuda.is_available() else False
 FloatTensor = torch.cuda.FloatTensor if cuda else torch.FloatTensor
 LongTensor = torch.cuda.LongTensor if cuda else torch.LongTensor
@@ -29,7 +43,7 @@ class Generator(nn.Module):
     def __init__(self):
         super(Generator, self).__init__()
 
-        self.label_emb = nn.Linear(opt.embedding_size, opt.embedding_size)
+        self.label_emb = nn.Linear(embedding_size, embedding_size)
 
         def block(in_feat, out_feat, normalize=True):
             layers = [nn.Linear(in_feat, out_feat)]
@@ -39,7 +53,7 @@ class Generator(nn.Module):
             return layers
 
         self.model = nn.Sequential(
-            *block(opt.latent_dim + opt.embedding_size, 128, normalize=False),
+            *block(latent_dim + embedding_size, 128, normalize=False),
             *block(128, 256),
             *block(256, 512),
             *block(512, 1024),
@@ -59,10 +73,10 @@ class Discriminator(nn.Module):
     def __init__(self):
         super(Discriminator, self).__init__()
 
-        self.label_embedding = nn.Linear(opt.embedding_size, opt.embedding_size)
+        self.label_embedding = nn.Linear(embedding_size, embedding_size)
 
         self.model = nn.Sequential(
-            nn.Linear(opt.embedding_size + int(np.prod(img_shape)), 512),
+            nn.Linear(embedding_size + int(np.prod(img_shape)), 512),
             nn.LeakyReLU(0.2, inplace=True),
             nn.Linear(512, 512),
             nn.Dropout(0.4),
@@ -81,11 +95,6 @@ class Discriminator(nn.Module):
 
 
 
-parser = argparse.ArgumentParser()
-parser.add_argument("--name", type=str, default="None", help="name of training (refer to cgan_all.py)")
-opt = parser.parse_args()
-
-
 # load generator, discriminator and digit embeddings
 generator = torch.load("images/" + str(opt.name) + "/generator.pt")
 discriminator = torch.load("images/" + str(opt.name) + "/discriminator.pt")
@@ -100,11 +109,6 @@ if cuda:
     generator.cuda()
     discriminator.cuda()
 
-# get training conditions
-n_epochs, batch_size, lr, n_discriminator, loss, n_classes = opt.name.split("_")
-n_epochs, batch_size, lr, n_discriminator, n_classes = int(n_epochs), int(batch_size), float(lr), int(n_discriminator), int(n_classes)
-
-latent_dim = 100 # NEED TO MANUALLY CHANGE
 
 def sample_images(numbers):
     """Saves a grid of generated digits in numbers"""
