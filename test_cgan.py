@@ -141,7 +141,7 @@ if cuda:
     discriminator.cuda()
     net.cuda()
 
-def inception_score(images, batch_size=10):
+def inception_score(images, batch_size=5):
     scores = []
     for i in range(int(math.ceil(float(len(images)) / float(batch_size)))):
         batch = Variable(torch.cat(images[i * batch_size: (i + 1) * batch_size], 0))
