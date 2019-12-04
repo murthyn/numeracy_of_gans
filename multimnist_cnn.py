@@ -21,6 +21,11 @@ from matplotlib import pyplot as plt
 
 from PIL import Image
 
+parser = argparse.ArgumentParser()
+parser.add_argument("--batch_size", type=int, default=32, help="batch size")
+parser.add_argument("--n_epochs", type=int, default=10, help="number of epochs")
+opt = parser.parse_args()
+
 
 x = np.load("data/xtrain32.npy")
 y = np.load("data/ytrain.npy")
@@ -38,8 +43,6 @@ LongTensor = torch.cuda.LongTensor if cuda else torch.LongTensor
 
 num_classes = 50
 learning_rate = 0.001
-n_epochs = 10
-batch_size = 16
 img_size = 32
 
 
@@ -107,7 +110,7 @@ train_loader = torch.utils.data.DataLoader(
     CustomTensorDataset(tensors = (x_train, y_train), transform = transforms.Compose(
             [transforms.Resize(img_size), transforms.ToTensor(), transforms.Normalize([0.5], [0.5])]
        )),
-    batch_size=batch_size,
+    batch_size=opt.batch_size,
     shuffle=True,
 )
 
@@ -115,12 +118,12 @@ test_loader = torch.utils.data.DataLoader(
     CustomTensorDataset(tensors = (x_test, y_test), transform = transforms.Compose(
             [transforms.Resize(img_size), transforms.ToTensor(), transforms.Normalize([0.5], [0.5])]
        )),
-    batch_size=batch_size,
+    batch_size=opt.batch_size,
     shuffle=True,
 )
 
 total_step = len(train_loader)
-for epoch in range(n_epochs):
+for epoch in range(opt.n_epochs):
     for i, (imgs, labels) in enumerate(train_loader):
         batch_size = imgs.shape[0]
 
@@ -138,7 +141,7 @@ for epoch in range(n_epochs):
 
         if (i+1) % 100 == 0:
             print ('Epoch [{}/{}], Step [{}/{}], Loss: {:.4f}' 
-                   .format(epoch+1, n_epochs, i+1, total_step, loss.item()))
+                   .format(epoch+1, opt.n_epochs, i+1, total_step, loss.item()))
 
 # Test the model
 model.eval()  # eval mode (batchnorm uses moving mean/variance instead of mini-batch mean/variance)
