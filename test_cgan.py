@@ -25,6 +25,7 @@ from PIL import Image
 parser = argparse.ArgumentParser()
 parser.add_argument("--name", type=str, default="None", help="name of training (refer to cgan_all.py)")
 parser.add_argument("--sample", type=bool, default=True, help="whether to sample images from generator")
+parser.add_argument("--inception_batch_size", type=int, default=10, help="inception batch size")
 opt = parser.parse_args()
 
 # get training conditions
@@ -211,7 +212,7 @@ loader = torch.utils.data.DataLoader(
     CustomTensorDataset(tensors = (x, y), transform = transforms.Compose(
             [transforms.Resize(32), transforms.ToTensor(), transforms.Normalize([0.5], [0.5])]
        )),
-    batch_size=10,
+    batch_size=opt.inception_batch_size,
     shuffle=True,
 )
 
