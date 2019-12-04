@@ -119,7 +119,7 @@ test_loader = torch.utils.data.DataLoader(
     shuffle=True,
 )
 
-
+total_step = len(train_loader)
 for epoch in range(n_epochs):
     for i, (imgs, labels) in enumerate(train_loader):
         batch_size = imgs.shape[0]
