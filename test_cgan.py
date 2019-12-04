@@ -154,17 +154,26 @@ def inception_score(images, batch_size=1):
     final_score = KL_d.mean()
     return final_score
 
-def sample_images(numbers):
+def sample_images(numbers, times=1):
     """Saves a grid of generated digits in numbers"""
-    # Sample noise
-    z = Variable(FloatTensor(np.random.normal(0, 1, (10*10, latent_dim))))
-    # Get labels ranging from 0 to n_classes for n rows
-    labels = np.array([num for _ in range(10) for num in numbers])
-    gen_labels = Variable(FloatTensor(digit_embeddings[labels]))
-    gen_imgs = generator(z, gen_labels)
-    if opt.sample:
-        save_image(gen_imgs.data, "images/" + str(opt.name) + "/test_" + str(numbers) + ".png", nrow=10, normalize=True)
-    return gen_imgs
+    gen_imgs_total = None
+    for i in range(times):
+        # Sample noise
+        z = Variable(FloatTensor(np.random.normal(0, 1, (10*10, latent_dim))))
+        # Get labels ranging from 0 to n_classes for n rows
+        labels = np.array([num for _ in range(10) for num in numbers])
+        gen_labels = Variable(FloatTensor(digit_embeddings[labels]))
+        gen_imgs = generator(z, gen_labels)
+        
+        if opt.sample and i == 0:
+            save_image(gen_imgs.data, "images/" + str(opt.name) + "/test_" + str(numbers) + ".png", nrow=10, normalize=True)
+        
+        if gen_imgs_total is None:
+            gen_imgs_total = gen_imgs
+        else:
+            gen_imgs_total = torch.cat((gen_imgs_total, gen_imgs), 0)
+
+    return gen_imgs_total
 
 x = np.load("data/xtrain32.npy")
 y = np.load("data/ytrain.npy")
@@ -214,7 +223,7 @@ for imgs, labels in loader:
 total_numbers = [i for i in range(0,70)]
 for i in range(7):
     gen_imgs = sample_images(total_numbers[10*i:10*i+10])
-    gen_score = inception_score(gen_imgs)
+    gen_score = inception_score(gen_imgs, 5)
     norm_gen_score = gen_score / score
     print("inception score for " + str(total_numbers[10*i:10*i+10]) + " is ", gen_score, " normalized ", norm_gen_score)
 
