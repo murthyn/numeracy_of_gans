@@ -171,6 +171,8 @@ for i in range(7):
     gen_imgs = sample_images(total_numbers[10*i:10*i+10])
     print("inception score for " + str(total_numbers[10*i:10*i+10]) + " is ", inception_score(gen_imgs))
 
+print("inception score for real images is ", inception_score(x[:10]))
+
     # SAMPLE MORE THAN TEN PER SCORE
 
 
