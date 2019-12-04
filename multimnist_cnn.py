@@ -150,9 +150,9 @@ with torch.no_grad():
     total = 0
     for imgs, labels in test_loader:
 
-        imgs_tensor = Variable(imgs.type(FloatTensor))
+        imgs = Variable(imgs.type(FloatTensor))
 
-        outputs = model(images)
+        outputs = model(imgs)
         _, predicted = torch.max(outputs.data, 1)
         total += labels.size(0)
         correct += (predicted == labels).sum().item()
