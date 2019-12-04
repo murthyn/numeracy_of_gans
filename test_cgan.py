@@ -143,6 +143,7 @@ if cuda:
 
 def inception_score(images, batch_size=1):
     scores = []
+    images = Variable(images.type(FloatTensor))
     for i in range(int(math.ceil(float(len(images)) / float(batch_size)))):
         batch = Variable(torch.cat(images[i * batch_size: (i + 1) * batch_size], 0))
         s = net(batch)  # skipping aux logits
