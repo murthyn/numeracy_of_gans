@@ -124,11 +124,12 @@ for epoch in range(n_epochs):
     for i, (imgs, labels) in enumerate(train_loader):
         batch_size = imgs.shape[0]
 
-        imgs_tensor = Variable(imgs.type(FloatTensor))
+        imgs = Variable(imgs.type(FloatTensor))
+        labels = Variable(labels.type(LongTensor))
 
         # forward pass
-        outputs = model(imgs_tensor)
-        loss = criterion(outputs, LongTensor(labels))
+        outputs = model(imgs)
+        loss = criterion(outputs, labels)
 
         # Backward and optimize
         optimizer.zero_grad()
