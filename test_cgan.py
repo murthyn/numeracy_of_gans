@@ -145,7 +145,7 @@ def inception_score(images, batch_size=1):
     scores = []
     images = Variable(images.type(FloatTensor))
     for i in range(int(math.ceil(float(len(images)) / float(batch_size)))):
-        batch = Variable(torch.cat(images[i * batch_size: (i + 1) * batch_size], 0))
+        batch = images[i * batch_size: (i + 1) * batch_size]
         s = net(batch)  # skipping aux logits
         scores.append(s)
     p_yx = F.softmax(torch.cat(scores, 0), 1)
