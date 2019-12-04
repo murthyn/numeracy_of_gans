@@ -224,7 +224,7 @@ for imgs, labels in loader:
 total_numbers = [i for i in range(0,70)]
 for i in range(7):
     gen_imgs = sample_images(total_numbers[10*i:10*i+10])
-    gen_score = inception_score(gen_imgs, 5)
+    gen_score = inception_score(gen_imgs, 10)
     norm_gen_score = gen_score / score
     print("inception score for " + str(total_numbers[10*i:10*i+10]) + " is ", gen_score, " normalized ", norm_gen_score)
 
