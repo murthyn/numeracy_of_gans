@@ -21,8 +21,10 @@ from matplotlib import pyplot as plt
 
 from PIL import Image
 
+
 parser = argparse.ArgumentParser()
 parser.add_argument("--name", type=str, default="None", help="name of training (refer to cgan_all.py)")
+parser.add_argument("--sample", type=bool, default=True, help="whether to sample images from generator")
 opt = parser.parse_args()
 
 # get training conditions
@@ -93,22 +95,63 @@ class Discriminator(nn.Module):
         validity = self.model(d_in)
         return validity
 
+class ConvNet(nn.Module):
+    def __init__(self, num_classes=50):
+        super(ConvNet, self).__init__()
+        self.layer1 = nn.Sequential(
+            nn.Conv2d(1, 8, kernel_size=5, stride=1, padding=2),
+            nn.BatchNorm2d(8),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2))
+        self.layer2 = nn.Sequential(
+            nn.Conv2d(8, 16, kernel_size=5, stride=1, padding=2),
+            nn.BatchNorm2d(16),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2))
+        self.layer3 = nn.Sequential(
+            nn.Conv2d(16, 32, kernel_size=5, stride=1, padding=2),
+            nn.BatchNorm2d(32),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2))
+        self.fc = nn.Linear(4*4*64, num_classes)
+        
+    def forward(self, x):
+        out = self.layer1(x)
+        out = self.layer2(out)
+        out = self.layer3(out)
+        out = out.reshape(out.size(0), -1)
+        out = self.fc(out)
+        return out 
 
-
-# load generator, discriminator and digit embeddings
+# load generator, discriminator, CNN and digit embeddings
 generator = torch.load("images/" + str(opt.name) + "/generator.pt")
 discriminator = torch.load("images/" + str(opt.name) + "/discriminator.pt")
 digit_embeddings = np.load("digit_embeddings.npy")
+net = ConvNet()
+net.load_state_dict(torch.load('model.ckpt'))
 
 # set both models to eval mode
 generator.eval()
 discriminator.eval()
+net.eval()
 
 # if cuda is available, use it
 if cuda:
     generator.cuda()
     discriminator.cuda()
+    net.cuda()
 
+def inception_score(images, batch_size=10):
+    scores = []
+    for i in range(int(math.ceil(float(len(images)) / float(batch_size)))):
+        batch = Variable(torch.cat(images[i * batch_size: (i + 1) * batch_size], 0))
+        s = net(batch)  # skipping aux logits
+        scores.append(s)
+    p_yx = F.softmax(torch.cat(scores, 0), 1)
+    p_y = p_yx.mean(0).unsqueeze(0).expand(p_yx.size(0), -1)
+    KL_d = p_yx * (torch.log(p_yx) - torch.log(p_y))
+    final_score = KL_d.mean()
+    return final_score
 
 def sample_images(numbers):
     """Saves a grid of generated digits in numbers"""
@@ -118,10 +161,19 @@ def sample_images(numbers):
     labels = np.array([num for _ in range(10) for num in numbers])
     gen_labels = Variable(FloatTensor(digit_embeddings[labels]))
     gen_imgs = generator(z, gen_labels)
-    save_image(gen_imgs.data, "images/" + str(opt.name) + "/test_" + str(numbers) + ".png", nrow=10, normalize=True)
+    if opt.sample:
+        save_image(gen_imgs.data, "images/" + str(opt.name) + "/test_" + str(numbers) + ".png", nrow=10, normalize=True)
+    return gen_imgs
 
 total_numbers = [i for i in range(0,70)]
-
 for i in range(7):
-    sample_images(total_numbers[10*i:10*i+10])
+    gen_imgs = sample_images(total_numbers[10*i:10*i+10])
+    print("inception score for " + str(total_numbers[10*i:10*i+10]) + " is ", inception_score(gen_imgs))
+
+    # SAMPLE MORE THAN TEN PER SCORE
+
+
+
+
+
 
