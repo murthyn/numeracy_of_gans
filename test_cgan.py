@@ -172,8 +172,46 @@ for i in range(7):
     print("inception score for " + str(total_numbers[10*i:10*i+10]) + " is ", inception_score(gen_imgs))
 
 x = np.load("data/xtrain32.npy")
+y = np.load("data/ytrain.npy")
+cuda = True if torch.cuda.is_available() else False
 x = torch.Tensor(x).to(torch.int8)
-print("inception score for real images is ", inception_score(x[:10]))
+y = torch.Tensor(y).to(torch.int8)
+
+# shuffle x and y
+random_perm = torch.randperm(x.shape[0])
+x = x[random_perm]
+y = y[random_perm]
+
+class CustomTensorDataset(Dataset):
+    """TensorDataset with support of transforms.
+    """
+    def __init__(self, tensors, transform=None):
+        assert all(tensors[0].size(0) == tensor.size(0) for tensor in tensors)
+        self.tensors = tensors
+        self.transform = transform
+
+    def __getitem__(self, index):
+        x = self.tensors[0][index]
+        x = Image.fromarray(x.numpy(), mode='L')
+        if self.transform:
+            x = self.transform(x)
+
+        y = self.tensors[1][index]
+
+        return x, y
+
+    def __len__(self):
+        return self.tensors[0].size(0)
+
+loader = torch.utils.data.DataLoader(
+    CustomTensorDataset(tensors = (x, y), transform = transforms.Compose(
+            [transforms.Resize(img_size), transforms.ToTensor(), transforms.Normalize([0.5], [0.5])]
+       )),
+    batch_size=opt.batch_size,
+    shuffle=True,
+)
+
+print("inception score for real images is ", inception_score(loader[0][0]))
 
     # SAMPLE MORE THAN TEN PER SCORE
 
