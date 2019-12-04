@@ -36,19 +36,25 @@ parser.add_argument("--sample_interval", type=int, default=1000, help="interval 
 parser.add_argument("--embedding_size", type=int, default=50, help="size of embedding layer")
 parser.add_argument("--n_discriminator", type=int, default=1, help="train discriminator every n_discriminator iterations")
 parser.add_argument("--n_generator", type=int, default=1, help="train generator every n_discriminator iterations")
-parser.add_argument("--loss", type=str, default="MSE", help="adversarial loss: MSE or Wasserstein")
+parser.add_argument("--loss", type=str, default="MSE", choices=["MSE", "Wasserstein"], help="adversarial loss: MSE or Wasserstein")
 parser.add_argument("--use_10", type=bool, default=False, help="use 10 classes or test on all 50")
 parser.add_argument("--clip_value", type=float, default=0.01, help="clipping discriminator weights for Wassertein loss")
-parser.add_argument("--train_random", type=bool, default=True, help="whether to train on a random subset of number 0-99, if false use 0-49, set to False if use_10=True")
+parser.add_argument("--interpolate", type=str, default="True", choices=["True", "False"], help="whether to dropout 5 of the labels 0-49 from training, otherwise use all of 0-49, set to False if use_10=True")
+parser.add_argument("--use_word_embedding", type=str, default="True", choices=["True", "False"], help="whether to use word embeddings or one-hot encoding of the word")
 opt = parser.parse_args()
 
-assert opt.loss in ['Wasserstein', 'MSE']
+opt.interpolate = opt.interpolate == "True"
+opt.use_word_embedding = opt.use_word_embedding == "True"
 #Wasserstein params
 #python cgan_updated.py --loss=Wasserstein --n_generator=5 --lr=5e-5
 
 x = np.load("data/xtrain32.npy")
 y = np.load("data/ytrain.npy")
-digit_embeddings = np.load("digit_embeddings.npy")
+
+if opt.use_word_embedding:
+    digit_embeddings = np.load("digit_embeddings.npy")
+else:
+    digit_embeddings = np.eye(100)
 
 cuda = True if torch.cuda.is_available() else False
 
@@ -64,21 +70,34 @@ else:
     y = torch.Tensor(y).to(torch.int8)
     img_shape = (opt.channels, opt.img_size, opt.img_size*2)
 
-if opt.train_random:
+'''if opt.train_random:
     train_numbers = [1, 2, 5, 8, 9, 11, 13, 15, 16, 17, 20, 21, 23, 25, 29, 30, 34, 35, 36, 39,
                     40, 41, 42, 43, 45, 51, 52, 53, 55, 57, 60, 64, 65, 66, 67, 70, 72, 74, 77, 79,
                     80, 83, 85, 88, 89, 90, 91, 94, 95, 97]
     #first five in training set, second five not
-    numbers = [5, 23, 52, 66, 70, 18, 32, 48, 86, 99]
+    numbers = [5, 23, 52, 66, 70, 18, 32, 48, 86, 99]'''
+
+if opt.interpolate:
+    test_numbers = [2, 24, 27, 45, 48]
+    train_numbers = [i for i in range(50)]
+    for num in test_numbers:
+        train_numbers.remove(num)
+    #first five in training set, second five not
+    numbers = [3, 10, 36, 39, 42, 2, 24, 27, 45, 48]
     
 else:
     train_numbers = [i for i in range(50)]
     numbers = [1, 22, 23, 26, 29, 33, 35, 37, 42, 48]
 
-name = str(opt.n_epochs)+"_"+str(opt.batch_size)+"_"+str(opt.lr)+"_"+ \
-       str(opt.n_discriminator)+"_"+str(opt.n_generator)+"_"+str(opt.loss)+"_"+str(opt.n_classes)+"_"+str(opt.train_random)
-os.makedirs(os.path.join("images/", str(name)), exist_ok=True)
+name = str(opt.n_epochs)+"_"+str(opt.batch_size)+"_"+str(opt.lr)+"_"+str(opt.n_discriminator)+\
+       "_"+str(opt.n_generator)+"_"+str(opt.loss)+"_"+str(opt.n_classes) + "_WE_{}".format(opt.use_word_embedding)
 
+if opt.interpolate:
+    name += "_50_interpolation"
+else:
+    name += "False"
+    
+os.makedirs(os.path.join("images/", str(name)), exist_ok=True)
 
 class CustomTensorDataset(Dataset):
     """TensorDataset with support of transforms.
@@ -104,8 +123,10 @@ class CustomTensorDataset(Dataset):
 class Generator(nn.Module):
     def __init__(self):
         super(Generator, self).__init__()
-
-        self.label_emb = nn.Linear(opt.embedding_size, opt.embedding_size)
+        if opt.use_word_embedding:
+            self.label_emb = nn.Linear(50, opt.embedding_size)
+        else:
+            self.label_emb = nn.Linear(100, opt.embedding_size)
 
         def block(in_feat, out_feat, normalize=True):
             layers = [nn.Linear(in_feat, out_feat)]
@@ -134,8 +155,11 @@ class Generator(nn.Module):
 class Discriminator(nn.Module):
     def __init__(self):
         super(Discriminator, self).__init__()
-
-        self.label_embedding = nn.Linear(opt.embedding_size, opt.embedding_size)
+        
+        if opt.use_word_embedding:
+            self.label_embedding = nn.Linear(50, opt.embedding_size)
+        else:
+            self.label_embedding = nn.Linear(100, opt.embedding_size)
 
         self.model = nn.Sequential(
             nn.Linear(opt.embedding_size + int(np.prod(img_shape)), 512),
