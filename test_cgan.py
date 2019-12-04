@@ -205,9 +205,9 @@ class CustomTensorDataset(Dataset):
 
 loader = torch.utils.data.DataLoader(
     CustomTensorDataset(tensors = (x, y), transform = transforms.Compose(
-            [transforms.Resize(img_size), transforms.ToTensor(), transforms.Normalize([0.5], [0.5])]
+            [transforms.Resize(32), transforms.ToTensor(), transforms.Normalize([0.5], [0.5])]
        )),
-    batch_size=opt.batch_size,
+    batch_size=10,
     shuffle=True,
 )
 
