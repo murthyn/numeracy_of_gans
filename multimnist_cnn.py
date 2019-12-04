@@ -25,6 +25,8 @@ from PIL import Image
 x = np.load("data/xtrain32.npy")
 y = np.load("data/ytrain.npy")
 cuda = True if torch.cuda.is_available() else False
+x = torch.Tensor(x).to(torch.int8)
+y = torch.Tensor(y).to(torch.int8)
 
 x_train = x[:250000]
 y_train = y[:250000]
@@ -98,6 +100,7 @@ optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 
 if cuda:
     model.cuda()
+    criterion.cuda()
 
 # Configure data loader
 train_loader = torch.utils.data.DataLoader(
@@ -115,6 +118,7 @@ test_loader = torch.utils.data.DataLoader(
     batch_size=batch_size,
     shuffle=True,
 )
+
 
 for epoch in range(n_epochs):
     for i, (imgs, labels) in enumerate(train_loader):
@@ -149,7 +153,7 @@ with torch.no_grad():
         total += labels.size(0)
         correct += (predicted == labels).sum().item()
 
-    print('Test Accuracy of the model on the 10000 test images: {} %'.format(100 * correct / total))
+    print('Test Accuracy of the model on the 50000 test images: {} %'.format(100 * correct / total))
 
 
 torch.save(model.state_dict(), 'model.ckpt')
