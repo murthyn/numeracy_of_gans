@@ -166,11 +166,6 @@ def sample_images(numbers):
         save_image(gen_imgs.data, "images/" + str(opt.name) + "/test_" + str(numbers) + ".png", nrow=10, normalize=True)
     return gen_imgs
 
-total_numbers = [i for i in range(0,70)]
-for i in range(7):
-    gen_imgs = sample_images(total_numbers[10*i:10*i+10])
-    print("inception score for " + str(total_numbers[10*i:10*i+10]) + " is ", inception_score(gen_imgs))
-
 x = np.load("data/xtrain32.npy")
 y = np.load("data/ytrain.npy")
 cuda = True if torch.cuda.is_available() else False
@@ -207,13 +202,23 @@ loader = torch.utils.data.DataLoader(
     CustomTensorDataset(tensors = (x, y), transform = transforms.Compose(
             [transforms.Resize(32), transforms.ToTensor(), transforms.Normalize([0.5], [0.5])]
        )),
-    batch_size=10,
+    batch_size=50,
     shuffle=True,
 )
 
 for imgs, labels in loader:
-    print("inception score for real images is ", inception_score(imgs))
+    score = inception_score(imgs)
+    print("inception score for real images is ", score)
     break
+
+total_numbers = [i for i in range(0,70)]
+for i in range(7):
+    gen_imgs = sample_images(total_numbers[10*i:10*i+10])
+    gen_score = inception_score(gen_imgs)
+    norm_gen_score = gen_score / score
+    print("inception score for " + str(total_numbers[10*i:10*i+10]) + " is ", gen_score, " normalized ", norm_gen_score)
+
+
 
     # SAMPLE MORE THAN TEN PER SCORE
 
