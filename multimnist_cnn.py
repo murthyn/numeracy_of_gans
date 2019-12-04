@@ -128,7 +128,7 @@ for epoch in range(n_epochs):
 
         # forward pass
         outputs = model(imgs_tensor)
-        loss = criterion(outputs, labels.cuda())
+        loss = criterion(outputs, LongTensor(labels))
 
         # Backward and optimize
         optimizer.zero_grad()
