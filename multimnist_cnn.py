@@ -33,6 +33,10 @@ cuda = True if torch.cuda.is_available() else False
 x = torch.Tensor(x).to(torch.int8)
 y = torch.Tensor(y).to(torch.int8)
 
+# shuffle x and y
+x = x[torch.randperm(x.shape[0])]
+y = y[torch.randperm(y.shape[0])]
+
 x_train = x[:250000]
 y_train = y[:250000]
 x_test = x[250000:]
