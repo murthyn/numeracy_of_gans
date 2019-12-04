@@ -211,7 +211,9 @@ loader = torch.utils.data.DataLoader(
     shuffle=True,
 )
 
-print("inception score for real images is ", inception_score(loader[0][0]))
+for imgs, labels in loader:
+    print("inception score for real images is ", inception_score(imgs))
+    break
 
     # SAMPLE MORE THAN TEN PER SCORE
 
