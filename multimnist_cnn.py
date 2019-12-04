@@ -151,6 +151,7 @@ with torch.no_grad():
     for imgs, labels in test_loader:
 
         imgs = Variable(imgs.type(FloatTensor))
+        labels = Variable(labels.type(LongTensor))
 
         outputs = model(imgs)
         _, predicted = torch.max(outputs.data, 1)
