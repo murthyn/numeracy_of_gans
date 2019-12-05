@@ -43,6 +43,14 @@ img_shape = (channels, img_size, img_size) if n_classes == 10 else (channels, im
 embedding_size = 50
 use_word_embedding = True
 
+opt.n_classes = 50
+opt.latent_dim = 100 # NEED TO MANUALLY CHANGE
+opt.img_size = 32
+opt.channels = 1
+opt.img_shape = (channels, img_size, img_size) if n_classes == 10 else (channels, img_size, img_size*2)
+opt.embedding_size = 50
+opt.use_word_embedding = True
+
 cuda = True if torch.cuda.is_available() else False
 FloatTensor = torch.cuda.FloatTensor if cuda else torch.FloatTensor
 LongTensor = torch.cuda.LongTensor if cuda else torch.LongTensor
@@ -104,10 +112,10 @@ LongTensor = torch.cuda.LongTensor if cuda else torch.LongTensor
 class Generator(nn.Module):
     def __init__(self):
         super(Generator, self).__init__()
-        if use_word_embedding:
-            self.label_emb = nn.Linear(50, embedding_size)
+        if opt.use_word_embedding:
+            self.label_emb = nn.Linear(50, opt.embedding_size)
         else:
-            self.label_emb = nn.Linear(100, embedding_size)
+            self.label_emb = nn.Linear(100, opt.embedding_size)
 
         def block(in_feat, out_feat, normalize=True):
             layers = [nn.Linear(in_feat, out_feat)]
@@ -117,7 +125,7 @@ class Generator(nn.Module):
             return layers
 
         self.model = nn.Sequential(
-            *block(latent_dim + embedding_size, 128, normalize=False),
+            *block(opt.latent_dim + opt.embedding_size, 128, normalize=False),
             *block(128, 256),
             *block(256, 512),
             *block(512, 1024),
@@ -137,13 +145,13 @@ class Discriminator(nn.Module):
     def __init__(self):
         super(Discriminator, self).__init__()
         
-        if use_word_embedding:
-            self.label_embedding = nn.Linear(50, embedding_size)
+        if opt.use_word_embedding:
+            self.label_embedding = nn.Linear(50, opt.embedding_size)
         else:
-            self.label_embedding = nn.Linear(100, embedding_size)
+            self.label_embedding = nn.Linear(100, opt.embedding_size)
 
         self.model = nn.Sequential(
-            nn.Linear(embedding_size + int(np.prod(img_shape)), 512),
+            nn.Linear(opt.embedding_size + int(np.prod(img_shape)), 512),
             nn.LeakyReLU(0.2, inplace=True),
             nn.Linear(512, 512),
             nn.Dropout(0.4),
