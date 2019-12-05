@@ -221,9 +221,13 @@ def inception_score(images, batch_size=1):
         print(s.shape)
         scores.append(s)
     p_yx = F.softmax(torch.cat(scores, 0), 1)
+    print("p_yx", p_yx)
     p_y = p_yx.mean(0).unsqueeze(0).expand(p_yx.size(0), -1)
+    print("p_y", p_y)
     KL_d = p_yx * (torch.log(p_yx) - torch.log(p_y))
+    print("KL_d", KL_d)
     final_score = KL_d.mean()
+    print("final_score", final_score)
     return final_score
 
 def sample_images(numbers, times=1):
