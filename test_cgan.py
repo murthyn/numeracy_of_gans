@@ -212,7 +212,7 @@ if cuda:
     discriminator.cuda()
     net.cuda()
 
-def inception_score(images, batch_size=1):
+def inception_score(images, batch_size=5):
     scores = []
     images = Variable(images.type(FloatTensor))
     for i in range(int(math.ceil(float(len(images)) / float(batch_size)))):
