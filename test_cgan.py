@@ -24,9 +24,11 @@ from PIL import Image
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--name", type=str, default="None", help="name of training (refer to cgan_all.py)")
-parser.add_argument("--sample", type=bool, default=True, help="whether to sample images from generator")
+parser.add_argument("--sample", type=str, default="True", help="whether to sample images from generator")
 parser.add_argument("--inception_batch_size", type=int, default=10, help="inception batch size")
 opt = parser.parse_args()
+
+opt.sample = opt.sample == "True"
 
 # get training conditions
 #n_epochs, batch_size, lr, n_discriminator, loss, n_classes = opt.name.split("_")
