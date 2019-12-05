@@ -29,9 +29,11 @@ parser.add_argument("--inception_batch_size", type=int, default=10, help="incept
 opt = parser.parse_args()
 
 # get training conditions
-n_epochs, batch_size, lr, n_discriminator, loss, n_classes = opt.name.split("_")
-n_epochs, batch_size, lr, n_discriminator, n_classes = int(n_epochs), int(batch_size), float(lr), int(n_discriminator), int(n_classes)
+#n_epochs, batch_size, lr, n_discriminator, loss, n_classes = opt.name.split("_")
+#n_epochs, batch_size, lr, n_discriminator, n_classes = int(n_epochs), int(batch_size), float(lr), int(n_discriminator), int(n_classes)
 
+n_classes = 50
+n_classes_cnn = 60
 latent_dim = 100 # NEED TO MANUALLY CHANGE
 img_size = 32
 channels = 1
@@ -114,7 +116,7 @@ class ConvNet(nn.Module):
             nn.BatchNorm2d(32),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2, stride=2))
-        self.fc = nn.Linear(4*4*64, num_classes)
+        self.fc = nn.Linear(4*4*64, n_classes_cnn)
         
     def forward(self, x):
         out = self.layer1(x)
@@ -129,7 +131,7 @@ generator = torch.load("images/" + str(opt.name) + "/generator.pt")
 discriminator = torch.load("images/" + str(opt.name) + "/discriminator.pt")
 digit_embeddings = np.load("digit_embeddings.npy")
 net = ConvNet()
-net.load_state_dict(torch.load('model.ckpt'))
+net.load_state_dict(torch.load('model_60.ckpt'))
 
 # set both models to eval mode
 generator.eval()
