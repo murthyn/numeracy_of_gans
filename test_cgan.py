@@ -33,7 +33,7 @@ opt = parser.parse_args()
 #n_epochs, batch_size, lr, n_discriminator, n_classes = int(n_epochs), int(batch_size), float(lr), int(n_discriminator), int(n_classes)
 
 n_classes = 50
-n_classes_cnn = 60
+n_classes_cnn = 50
 latent_dim = 100 # NEED TO MANUALLY CHANGE
 img_size = 32
 channels = 1
