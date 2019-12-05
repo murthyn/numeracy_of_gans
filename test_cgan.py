@@ -219,6 +219,8 @@ loader = torch.utils.data.DataLoader(
 )
 
 for imgs, labels in loader:
+    print(imgs.shape)
+    print(lablels.shape)
     score = inception_score(imgs)
     print("inception score for real images is ", score.item())
     break
