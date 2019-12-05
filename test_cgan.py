@@ -212,7 +212,7 @@ if cuda:
     discriminator.cuda()
     net.cuda()
 
-def inception_score(images, batch_size=5):
+def inception_score(images, batch_size=5, epsilon=1e-20):
     scores = []
     images = Variable(images.type(FloatTensor))
     for i in range(int(math.ceil(float(len(images)) / float(batch_size)))):
@@ -226,7 +226,7 @@ def inception_score(images, batch_size=5):
     p_y = p_yx.mean(0).unsqueeze(0).expand(p_yx.size(0), -1)
     print("num nans p_y", torch.sum(torch.isnan(p_y)))
     print("p_y", p_y)
-    KL_d = p_yx * (torch.log(p_yx) - torch.log(p_y))
+    KL_d = p_yx * (torch.log(p_yx + epsilon) - torch.log(p_y + epsilon))
     print("num nans KL_d", torch.sum(torch.isnan(KL_d)))
     final_score = KL_d.mean()
     print("final_score", final_score)
