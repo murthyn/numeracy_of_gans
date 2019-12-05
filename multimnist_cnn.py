@@ -27,8 +27,8 @@ parser.add_argument("--n_epochs", type=int, default=10, help="number of epochs")
 opt = parser.parse_args()
 
 
-x = np.load("data/xtrain32.npy")
-y = np.load("data/ytrain.npy")
+x = np.load("data_60/xtrain32.npy")
+y = np.load("data_60/ytrain.npy")
 cuda = True if torch.cuda.is_available() else False
 x = torch.Tensor(x).to(torch.int8)
 y = torch.Tensor(y).to(torch.int8)
@@ -38,15 +38,15 @@ random_perm = torch.randperm(x.shape[0])
 x = x[random_perm]
 y = y[random_perm]
 
-x_train = x[:250000]
-y_train = y[:250000]
-x_test = x[250000:]
-y_test = y[250000:]
+x_train = x[:300000]
+y_train = y[:300000]
+x_test = x[300000:]
+y_test = y[300000:]
 
 FloatTensor = torch.cuda.FloatTensor if cuda else torch.FloatTensor
 LongTensor = torch.cuda.LongTensor if cuda else torch.LongTensor
 
-num_classes = 50
+num_classes = 60
 learning_rate = 0.001
 img_size = 32
 
@@ -166,7 +166,7 @@ with torch.no_grad():
     print('Test Accuracy of the model on the 50000 test images: {} %'.format(100 * correct / total))
 
 
-torch.save(model.state_dict(), 'model.ckpt')
+torch.save(model.state_dict(), 'model_60.ckpt')
 
 
 
