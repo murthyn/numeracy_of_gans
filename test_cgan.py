@@ -218,7 +218,6 @@ def inception_score(images, batch_size=5, epsilon=1e-20):
     for i in range(int(math.ceil(float(len(images)) / float(batch_size)))):
         batch = images[i * batch_size: (i + 1) * batch_size]
         s = net(batch)  # skipping aux logits
-        print(s.shape)
         scores.append(s)
     p_yx = F.softmax(torch.cat(scores, 0), 1)
     p_y = p_yx.mean(0).unsqueeze(0).expand(p_yx.size(0), -1)
