@@ -191,7 +191,7 @@ generator = torch.load("images/" + str(opt.name) + "/generator.pt")
 discriminator = torch.load("images/" + str(opt.name) + "/discriminator.pt")
 digit_embeddings = np.load("digit_embeddings.npy")
 net = ConvNet()
-net.load_state_dict(torch.load('model_60.ckpt'))
+net.load_state_dict(torch.load('model.ckpt'))
 
 # set both models to eval mode
 generator.eval()
