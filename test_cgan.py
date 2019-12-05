@@ -22,6 +22,9 @@ from matplotlib import pyplot as plt
 from PIL import Image
 
 
+torch.nn.Module.dump_patches = True
+
+
 parser = argparse.ArgumentParser()
 parser.add_argument("--name", type=str, default="None", help="name of training (refer to cgan_all.py)")
 parser.add_argument("--sample", type=bool, default=True, help="whether to sample images from generator")
