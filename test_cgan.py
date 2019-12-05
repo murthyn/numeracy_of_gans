@@ -225,7 +225,7 @@ def inception_score(images, batch_size=5, epsilon=1e-20):
     final_score = KL_d.mean()
     return final_score
 
-def sample_images(numbers, times=1):
+def sample_images(numbers, times=1, type="train"):
     """Saves a grid of generated digits in numbers"""
     gen_imgs_total = None
     for i in range(times):
@@ -237,7 +237,7 @@ def sample_images(numbers, times=1):
         gen_imgs = generator(z, gen_labels)
         
         if opt.sample and i == 0:
-            save_image(gen_imgs.data, "images/" + str(opt.name) + "/test_" + str(numbers) + ".png", nrow=10, normalize=True)
+            save_image(gen_imgs.data, "images/" + str(opt.name) + "/" + str(type) + "_" + str(numbers) + ".png", nrow=10, normalize=True)
         
         if gen_imgs_total is None:
             gen_imgs_total = gen_imgs
@@ -293,21 +293,21 @@ for imgs, labels in loader:
 
 print("TRAIN")
 train_numbers = [i for i in range(50) if i != [2, 24, 27, 45, 48]] * 2
-gen_imgs = sample_images([])
+gen_imgs = sample_images(train_numbers, 5, type="train")
 gen_score = inception_score(gen_imgs, 10)
 norm_gen_score = gen_score / score
 print("inception score", norm_gen_score.item())
 
 
 print("INTERPOLATION")
-gen_imgs = sample_images([2, 24, 27, 45, 48, 2, 24, 27, 45, 48])
+gen_imgs = sample_images([2, 24, 27, 45, 48, 2, 24, 27, 45, 48], 5, type="interp")
 gen_score = inception_score(gen_imgs, 10)
 norm_gen_score = gen_score / score
 print("inception score", norm_gen_score.item())
 
 
 print("EXTRAPOLATION")
-gen_imgs = sample_images([50, 51, 52, 53, 54, 55, 56, 57, 58, 59])
+gen_imgs = sample_images([50, 51, 52, 53, 54, 55, 56, 57, 58, 59], 5, type="extrap")
 gen_score = inception_score(gen_imgs, 10)
 norm_gen_score = gen_score / score
 print("inception score", norm_gen_score.item())
