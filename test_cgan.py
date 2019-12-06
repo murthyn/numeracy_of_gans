@@ -240,8 +240,8 @@ def accuracy(images, labels, batch_size=5):
         print("labels batch", labels_batch)
         s = net(batch)  # skipping aux logits
         print("s shape", s.shape)
-        print("argmax", torch.argmax(s))
-        accuracy = torch.mean((torch.argmax(s) == labels_batch).float())
+        print("argmax", torch.argmax(s, axis=1))
+        accuracy = torch.mean((torch.argmax(s, axis=1) == labels_batch).float())
         print("accuracy", accuracy)
         accuracies.append(accuracy)
 
