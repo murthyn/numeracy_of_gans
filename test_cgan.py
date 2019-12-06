@@ -236,7 +236,7 @@ def accuracy(images, labels, batch_size=5):
         batch = images[i * batch_size: (i + 1) * batch_size]
         labels_batch = labels[i * batch_size: (i + 1) * batch_size]
         s = net(batch)  # skipping aux logits
-        accuracy = torch.mean(torch.argmax(s) == labels_batch)
+        accuracy = torch.mean(FloatTensor(torch.argmax(s) == labels_batch))
         accuracies.append(accuracy)
 
     return sum(accuracies).item()/len(accuracies)
