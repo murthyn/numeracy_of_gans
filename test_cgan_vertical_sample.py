@@ -52,11 +52,20 @@ opt = parser.parse_args()
 #n_epochs, batch_size, lr, n_discriminator, loss, n_classes = opt.name.split("_")
 #n_epochs, batch_size, lr, n_discriminator, n_classes = int(n_epochs), int(batch_size), float(lr), int(n_discriminator), int(n_classes)
 
+opt.interpolate = opt.interpolate == "True"
+opt.use_word_embedding = opt.use_word_embedding == "True"
+
+
 img_shape = (opt.channels, opt.img_size, opt.img_size) if opt.n_classes == 10 else (opt.channels, opt.img_size, opt.img_size*2)
 
 cuda = True if torch.cuda.is_available() else False
 FloatTensor = torch.cuda.FloatTensor if cuda else torch.FloatTensor
 LongTensor = torch.cuda.LongTensor if cuda else torch.LongTensor
+
+if opt.use_word_embedding:
+    digit_embeddings = np.load("digit_embeddings.npy")
+else:
+    digit_embeddings = np.eye(100)
 
 class Generator(nn.Module):
     def __init__(self):
@@ -120,7 +129,7 @@ class Discriminator(nn.Module):
 # load generator, discriminator, CNN and digit embeddings
 generator = torch.load("images/" + str(opt.name) + "/generator.pt")
 discriminator = torch.load("images/" + str(opt.name) + "/discriminator.pt")
-digit_embeddings = np.load("digit_embeddings.npy")
+
 
 # set both models to eval mode
 generator.eval()
