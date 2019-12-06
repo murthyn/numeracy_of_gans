@@ -24,9 +24,11 @@ from PIL import Image
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--name", type=str, default="None", help="name of training (refer to cgan_all.py)")
-parser.add_argument("--sample", type=bool, default=True, help="whether to sample images from generator")
-parser.add_argument("--inception_batch_size", type=int, default=10, help="inception batch size")
+parser.add_argument("--sample", type=str, default="True", help="whether to sample images from generator")
+parser.add_argument("--inception_batch_size", type=int, default=100, help="inception batch size")
 opt = parser.parse_args()
+
+opt.sample = opt.sample == "True"
 
 # get training conditions
 #n_epochs, batch_size, lr, n_discriminator, loss, n_classes = opt.name.split("_")
@@ -38,7 +40,7 @@ img_size = 32
 channels = 1
 img_shape = (channels, img_size, img_size) if n_classes == 10 else (channels, img_size, img_size*2)
 embedding_size = 50
-use_word_embedding = True
+use_word_embedding = False
 
 opt.n_classes = 50
 opt.latent_dim = 100 # NEED TO MANUALLY CHANGE
@@ -46,7 +48,7 @@ opt.img_size = 32
 opt.channels = 1
 opt.img_shape = (channels, img_size, img_size) if n_classes == 10 else (channels, img_size, img_size*2)
 opt.embedding_size = 50
-opt.use_word_embedding = True
+opt.use_word_embedding = False
 
 cuda = True if torch.cuda.is_available() else False
 FloatTensor = torch.cuda.FloatTensor if cuda else torch.FloatTensor
@@ -197,7 +199,10 @@ class ConvNet(nn.Module):
 # load generator, discriminator, CNN and digit embeddings
 generator = torch.load("images/" + str(opt.name) + "/generator.pt")
 discriminator = torch.load("images/" + str(opt.name) + "/discriminator.pt")
-digit_embeddings = np.load("digit_embeddings.npy")
+if opt.use_word_embedding:
+    digit_embeddings = np.load("digit_embeddings.npy")
+else:
+    digit_embeddings = np.eye(100)
 net = ConvNet()
 net.load_state_dict(torch.load('model_60.ckpt'))
 
@@ -225,7 +230,27 @@ def inception_score(images, batch_size=5, epsilon=1e-20):
     final_score = KL_d.mean()
     return final_score
 
-def sample_images(numbers, times=1):
+def accuracy(images, labels, batch_size=5):
+    labels = [num for _ in range(10) for num in labels]
+    
+    labels = torch.tensor(labels, dtype=torch.long, device = torch.device('cuda:0'))
+    accuracies = []
+    images = Variable(images.type(FloatTensor))
+    for i in range(int(math.ceil(float(len(images)) / float(batch_size)))):
+        batch = images[i * batch_size: (i + 1) * batch_size]
+        labels_batch = labels[i * batch_size: (i + 1) * batch_size]
+        # print("labels batch", labels_batch)
+        s = net(batch)  # skipping aux logits
+        # print("s shape", s.shape)
+        # print("argmax", torch.argmax(s, axis=1))
+        accuracy = torch.mean((torch.argmax(s, axis=1) == labels_batch).float())
+        # print("accuracy", accuracy)
+        accuracies.append(accuracy)
+
+    return sum(accuracies).item()/len(accuracies)
+
+
+def sample_images(numbers, times=1, type="train"):
     """Saves a grid of generated digits in numbers"""
     gen_imgs_total = None
     for i in range(times):
@@ -234,10 +259,11 @@ def sample_images(numbers, times=1):
         # Get labels ranging from 0 to n_classes for n rows
         labels = np.array([num for _ in range(10) for num in numbers])
         gen_labels = Variable(FloatTensor(digit_embeddings[labels]))
+        print("shape", z.shape, gen_labels.shape)
         gen_imgs = generator(z, gen_labels)
         
         if opt.sample and i == 0:
-            save_image(gen_imgs.data, "images/" + str(opt.name) + "/test_" + str(numbers) + ".png", nrow=10, normalize=True)
+            save_image(gen_imgs.data, "images/" + str(opt.name) + "/" + str(type) + "_" + str(numbers) + ".png", nrow=10, normalize=True)
         
         if gen_imgs_total is None:
             gen_imgs_total = gen_imgs
@@ -291,12 +317,45 @@ for imgs, labels in loader:
     print("inception score for real images is ", score.item())
     break
 
-total_numbers = [i for i in range(0,70)]
-for i in range(7):
-    gen_imgs = sample_images(total_numbers[10*i:10*i+10])
+print("TRAIN")
+train_numbers = [i for i in range(50) if i != [2, 24, 27, 45, 48]] * 2
+sum_scores = 0
+sum_accs = 0
+for j in range(9):
+    gen_imgs = sample_images(train_numbers[10*j:10*j+10], 15, type="train")
     gen_score = inception_score(gen_imgs, 10)
     norm_gen_score = gen_score / score
-    print("inception score for " + str(total_numbers[10*i:10*i+10]) + " is ", gen_score.item(), " normalized ", norm_gen_score.item())
+    sum_scores += norm_gen_score.item()
+    acc = accuracy(gen_imgs, train_numbers[10*j:10*j+10] * 15)
+    sum_accs += acc
+
+print("inception score", sum_scores/9)
+print("accuracy", sum_accs/9)
+
+print("INTERPOLATION")
+gen_imgs = sample_images([2, 24, 27, 45, 48, 2, 24, 27, 45, 48], 15, type="interp")
+gen_score = inception_score(gen_imgs, 10)
+norm_gen_score = gen_score / score
+acc = accuracy(gen_imgs, [2, 24, 27, 45, 48, 2, 24, 27, 45, 48] * 15)
+print("inception score", norm_gen_score.item())
+print("accuracy", acc)
+
+
+print("EXTRAPOLATION")
+gen_imgs = sample_images([50, 51, 52, 53, 54, 55, 56, 57, 58, 59], 15, type="extrap")
+gen_score = inception_score(gen_imgs, 10)
+norm_gen_score = gen_score / score
+acc = accuracy(gen_imgs, [50, 51, 52, 53, 54, 55, 56, 57, 58, 59] * 15)
+print("inception score", norm_gen_score.item())
+print("accuracy", acc)
+
+
+# total_numbers = [i for i in range(0,70)]
+# for i in range(7):
+#     gen_imgs = sample_images(total_numbers[10*i:10*i+10])
+#     gen_score = inception_score(gen_imgs, 10)
+#     norm_gen_score = gen_score / score
+#     print("inception score for " + str(total_numbers[10*i:10*i+10]) + " is ", gen_score.item(), " normalized ", norm_gen_score.item())
 
 
 
