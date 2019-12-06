@@ -25,7 +25,7 @@ from PIL import Image
 parser = argparse.ArgumentParser()
 parser.add_argument("--name", type=str, default="None", help="name of training (refer to cgan_all.py)")
 parser.add_argument("--sample", type=str, default="True", help="whether to sample images from generator")
-parser.add_argument("--inception_batch_size", type=int, default=10, help="inception batch size")
+parser.add_argument("--inception_batch_size", type=int, default=100, help="inception batch size")
 opt = parser.parse_args()
 
 opt.sample = opt.sample == "True"
@@ -295,11 +295,13 @@ for imgs, labels in loader:
 
 print("TRAIN")
 train_numbers = [i for i in range(50) if i != [2, 24, 27, 45, 48]] * 2
+sum_scores = 0
 for j in range(9):
     gen_imgs = sample_images(train_numbers[10*j:10*j+10], 5, type="train")
     gen_score = inception_score(gen_imgs, 10)
     norm_gen_score = gen_score / score
-    print("inception score", norm_gen_score.item())
+    sum_scores += norm_gen_score.item()
+print("inception score", sum_scores/9)
 
 
 print("INTERPOLATION")
