@@ -297,7 +297,7 @@ print("TRAIN")
 train_numbers = [i for i in range(50) if i != [2, 24, 27, 45, 48]] * 2
 sum_scores = 0
 for j in range(9):
-    gen_imgs = sample_images(train_numbers[10*j:10*j+10], 5, type="train")
+    gen_imgs = sample_images(train_numbers[10*j:10*j+10], 15, type="train")
     gen_score = inception_score(gen_imgs, 10)
     norm_gen_score = gen_score / score
     sum_scores += norm_gen_score.item()
@@ -305,14 +305,14 @@ print("inception score", sum_scores/9)
 
 
 print("INTERPOLATION")
-gen_imgs = sample_images([2, 24, 27, 45, 48, 2, 24, 27, 45, 48], 5, type="interp")
+gen_imgs = sample_images([2, 24, 27, 45, 48, 2, 24, 27, 45, 48], 15, type="interp")
 gen_score = inception_score(gen_imgs, 10)
 norm_gen_score = gen_score / score
 print("inception score", norm_gen_score.item())
 
 
 print("EXTRAPOLATION")
-gen_imgs = sample_images([50, 51, 52, 53, 54, 55, 56, 57, 58, 59], 5, type="extrap")
+gen_imgs = sample_images([50, 51, 52, 53, 54, 55, 56, 57, 58, 59], 15, type="extrap")
 gen_score = inception_score(gen_imgs, 10)
 norm_gen_score = gen_score / score
 print("inception score", norm_gen_score.item())
