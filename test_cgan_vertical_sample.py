@@ -23,7 +23,7 @@ from PIL import Image
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--name", type=str, default="5_64_0.0001_1_1_MSE_50_WE_True_50_interpolation", help="name of training (refer to cgan_updated.py)")
+parser.add_argument("--name", type=str, default="we_trained", help="name of training (refer to cgan_updated.py)")
 parser.add_argument("--sample", type=bool, default=True, help="whether to sample images from generator")
 parser.add_argument("--inception_batch_size", type=int, default=10, help="inception batch size")
 
@@ -136,14 +136,14 @@ def sample_images(numbers, times=1):
     gen_imgs_total = None
     for i in range(times):
         # Sample noise
-        z = Variable(FloatTensor(np.random.normal(0, 1, (10*10, opt.latent_dim))))
+        z = Variable(FloatTensor(np.random.normal(0, 1, (15, opt.latent_dim))))
         # Get labels ranging from 0 to n_classes for n rows
-        labels = np.array([i for i in numbers for _ in range(10)])
+        labels = np.array([i for i in numbers for _ in range(3)])
         gen_labels = Variable(FloatTensor(digit_embeddings[labels]))
         gen_imgs = generator(z, gen_labels)
         
         if opt.sample and i == 0:
-            save_image(gen_imgs.data, "images/" + str(opt.name) + "/test_" + str(numbers) + ".png", nrow=10, padding=3, pad_value =1,normalize=True)
+            save_image(gen_imgs.data, "images/" + str(opt.name) + "/test_" + str(numbers) + ".png", nrow=3, padding=3, pad_value =1,normalize=True)
         
         if gen_imgs_total is None:
             gen_imgs_total = gen_imgs
@@ -153,9 +153,11 @@ def sample_images(numbers, times=1):
     return gen_imgs_total
 
 total_numbers = [i for i in range(0,60)]
-for i in range(6):
-    gen_imgs = sample_images(total_numbers[10*i:10*i+10])
+#for i in range(6):
 
+sample_images([0,13,25,40,47])
+sample_images([2,24,27,45,48])
+sample_images([50,51,52,53,54])
 
 
 
