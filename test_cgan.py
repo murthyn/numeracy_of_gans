@@ -40,7 +40,7 @@ img_size = 32
 channels = 1
 img_shape = (channels, img_size, img_size) if n_classes == 10 else (channels, img_size, img_size*2)
 embedding_size = 50
-use_word_embedding = True
+use_word_embedding = False
 
 opt.n_classes = 50
 opt.latent_dim = 100 # NEED TO MANUALLY CHANGE
@@ -229,7 +229,6 @@ def inception_score(images, batch_size=5, epsilon=1e-20):
 
 def accuracy(images, labels, batch_size=5):
     labels = [num for _ in range(10) for num in labels]
-    print(len(images), len(labels))
     
     labels = torch.tensor(labels, dtype=torch.long, device = torch.device('cuda:0'))
     accuracies = []
