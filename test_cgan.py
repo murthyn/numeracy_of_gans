@@ -48,7 +48,7 @@ opt.img_size = 32
 opt.channels = 1
 opt.img_shape = (channels, img_size, img_size) if n_classes == 10 else (channels, img_size, img_size*2)
 opt.embedding_size = 50
-opt.use_word_embedding = True
+opt.use_word_embedding = False
 
 cuda = True if torch.cuda.is_available() else False
 FloatTensor = torch.cuda.FloatTensor if cuda else torch.FloatTensor
