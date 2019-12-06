@@ -227,6 +227,19 @@ def inception_score(images, batch_size=5, epsilon=1e-20):
     final_score = KL_d.mean()
     return final_score
 
+def accuracy(images, labels, batch_size=5):
+    accuracies = []
+    images = Variable(images.type(FloatTensor))
+    for i in range(int(math.ceil(float(len(images)) / float(batch_size)))):
+        batch = images[i * batch_size: (i + 1) * batch_size]
+        labels_batch = labels[i * batch_size: (i + 1) * batch_size]
+        s = net(batch)  # skipping aux logits
+        accuracy = torch.mean(torch.argmax(s) == labels)
+        accuracies.append(accuracy)
+
+    return sum(accuracies).item()/len(accuracies)
+
+
 def sample_images(numbers, times=1, type="train"):
     """Saves a grid of generated digits in numbers"""
     gen_imgs_total = None
@@ -296,26 +309,34 @@ for imgs, labels in loader:
 print("TRAIN")
 train_numbers = [i for i in range(50) if i != [2, 24, 27, 45, 48]] * 2
 sum_scores = 0
+sum_accs = 0
 for j in range(9):
     gen_imgs = sample_images(train_numbers[10*j:10*j+10], 15, type="train")
     gen_score = inception_score(gen_imgs, 10)
     norm_gen_score = gen_score / score
     sum_scores += norm_gen_score.item()
-print("inception score", sum_scores/9)
+    acc = accuracy(gen_imgs, train_numbers[10*j:10*j+10] * 15)
+    sum_accs += acc
 
+print("inception score", sum_scores/9)
+print("accuracy", sum_accs/9)
 
 print("INTERPOLATION")
 gen_imgs = sample_images([2, 24, 27, 45, 48, 2, 24, 27, 45, 48], 15, type="interp")
 gen_score = inception_score(gen_imgs, 10)
 norm_gen_score = gen_score / score
+acc = accuracy(gen_imgs, [2, 24, 27, 45, 48, 2, 24, 27, 45, 48] * 15)
 print("inception score", norm_gen_score.item())
+print("accuracy", acc)
 
 
 print("EXTRAPOLATION")
 gen_imgs = sample_images([50, 51, 52, 53, 54, 55, 56, 57, 58, 59], 15, type="extrap")
 gen_score = inception_score(gen_imgs, 10)
 norm_gen_score = gen_score / score
+acc = accuracy(gen_imgs, [50, 51, 52, 53, 54, 55, 56, 57, 58, 59] * 15)
 print("inception score", norm_gen_score.item())
+print("accuracy", acc)
 
 
 # total_numbers = [i for i in range(0,70)]
