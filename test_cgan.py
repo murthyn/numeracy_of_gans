@@ -259,6 +259,7 @@ def sample_images(numbers, times=1, type="train"):
         # Get labels ranging from 0 to n_classes for n rows
         labels = np.array([num for _ in range(10) for num in numbers])
         gen_labels = Variable(FloatTensor(digit_embeddings[labels]))
+        print("shape", z.shape, gen_labels.shape)
         gen_imgs = generator(z, gen_labels)
         
         if opt.sample and i == 0:
