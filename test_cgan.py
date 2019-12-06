@@ -295,10 +295,11 @@ for imgs, labels in loader:
 
 print("TRAIN")
 train_numbers = [i for i in range(50) if i != [2, 24, 27, 45, 48]] * 2
-gen_imgs = sample_images(train_numbers, 5, type="train")
-gen_score = inception_score(gen_imgs, 10)
-norm_gen_score = gen_score / score
-print("inception score", norm_gen_score.item())
+for j in range(9):
+    gen_imgs = sample_images(train_numbers[10*j:10*j+10], 5, type="train")
+    gen_score = inception_score(gen_imgs, 10)
+    norm_gen_score = gen_score / score
+    print("inception score", norm_gen_score.item())
 
 
 print("INTERPOLATION")
