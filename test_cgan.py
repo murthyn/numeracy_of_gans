@@ -199,7 +199,10 @@ class ConvNet(nn.Module):
 # load generator, discriminator, CNN and digit embeddings
 generator = torch.load("images/" + str(opt.name) + "/generator.pt")
 discriminator = torch.load("images/" + str(opt.name) + "/discriminator.pt")
-digit_embeddings = np.load("digit_embeddings.npy")
+if opt.use_word_embedding:
+    digit_embeddings = np.load("digit_embeddings.npy")
+else:
+    digit_embeddings = np.eye(100)
 net = ConvNet()
 net.load_state_dict(torch.load('model_60.ckpt'))
 
