@@ -231,6 +231,7 @@ def accuracy(images, labels, batch_size=5):
     print("labels before", labels)
     labels = torch.tensor(labels, dtype=torch.long, device = torch.device('cuda:0'))
     print("labels after", labels)
+    return
     accuracies = []
     images = Variable(images.type(FloatTensor))
     for i in range(int(math.ceil(float(len(images)) / float(batch_size)))):
@@ -238,6 +239,7 @@ def accuracy(images, labels, batch_size=5):
         labels_batch = labels[i * batch_size: (i + 1) * batch_size]
         print("labels batch", labels_batch)
         s = net(batch)  # skipping aux logits
+        print("s shape", s.shape)
         print("argmax", torch.argmax(s))
         accuracy = torch.mean((torch.argmax(s) == labels_batch).float())
         print("accuracy", accuracy)
