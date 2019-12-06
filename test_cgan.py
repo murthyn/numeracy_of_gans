@@ -228,13 +228,15 @@ def inception_score(images, batch_size=5, epsilon=1e-20):
     return final_score
 
 def accuracy(images, labels, batch_size=5):
-    labels = torch.tensor(labels)
+    labels = torch.tensor(labels, dtype=torch.long)
     if cuda: labels = labels.cuda()
     accuracies = []
     images = Variable(images.type(FloatTensor))
     for i in range(int(math.ceil(float(len(images)) / float(batch_size)))):
         batch = images[i * batch_size: (i + 1) * batch_size]
         labels_batch = labels[i * batch_size: (i + 1) * batch_size]
+        print(labels_batch)
+        print(torch.argmax(s))
         s = net(batch)  # skipping aux logits
         accuracy = torch.mean((torch.argmax(s) == labels_batch).float())
         print(accuracy)
