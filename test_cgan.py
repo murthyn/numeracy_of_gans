@@ -237,12 +237,12 @@ def accuracy(images, labels, batch_size=5):
     for i in range(int(math.ceil(float(len(images)) / float(batch_size)))):
         batch = images[i * batch_size: (i + 1) * batch_size]
         labels_batch = labels[i * batch_size: (i + 1) * batch_size]
-        print("labels batch", labels_batch)
+        # print("labels batch", labels_batch)
         s = net(batch)  # skipping aux logits
-        print("s shape", s.shape)
-        print("argmax", torch.argmax(s, axis=1))
+        # print("s shape", s.shape)
+        # print("argmax", torch.argmax(s, axis=1))
         accuracy = torch.mean((torch.argmax(s, axis=1) == labels_batch).float())
-        print("accuracy", accuracy)
+        # print("accuracy", accuracy)
         accuracies.append(accuracy)
 
     return sum(accuracies).item()/len(accuracies)
